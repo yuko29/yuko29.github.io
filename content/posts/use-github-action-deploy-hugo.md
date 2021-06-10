@@ -3,7 +3,7 @@ title: "Use GitHub Action 將 Hugo 部署到 GitHub Page"
 date: 2021-06-10T02:30:43+08:00
 categories: ['DevOps']
 tags: ['github', 'hugo']
-draft: true
+draft: false
 ---
 
 想要接觸 CI/CD，GitHub 有提供 CI/CD 服務 GitHub Actions，於是先拿自己的 blog 下手。  
