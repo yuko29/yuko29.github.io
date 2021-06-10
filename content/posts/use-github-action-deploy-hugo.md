@@ -141,11 +141,11 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
         with:
-          if: github.ref == 'refs/heads/main'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages  # default: gh-pages
-          force_orphan: true
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_branch: gh-pages  # default: gh-pages
+            force_orphan: true
 
 ```
 
