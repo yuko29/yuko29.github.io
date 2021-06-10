@@ -33,7 +33,7 @@ GitHub Actions 所需具備的元素，階層由上到下依序是：Workflow、
 ## 建立 Workflow
 
 以下是拿 Hugo 官方提供的範例進行修改的。  
-在專案目錄內建立 `.github/workflows/gh-page.yml`。
+在專案目錄內建立 `.github/workflows/gh-page.yml`。  
 為 workflow 取名：
 
 ```yml
