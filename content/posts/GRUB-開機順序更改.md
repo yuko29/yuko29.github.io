@@ -16,7 +16,7 @@ draft: false
 
 ## 第一種：修改 `/etc/default/grub`
 
-開啟 GURB 設定檔
+開啟 GRUB 設定檔
 
 ```bash
 sudo gedit /etc/default/grub
