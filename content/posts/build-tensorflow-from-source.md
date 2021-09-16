@@ -3,7 +3,7 @@ title: "Building Tensorflow From Source"
 date: 2021-09-12T18:21:01+08:00
 categories: ["tensorflow"]
 tags: []
-draft: true
+draft: false
 
 ---
 
@@ -140,6 +140,3 @@ ImportError: SystemError: <built-in method __contains__ of dict object at 0x7f0b
 ```
 
 查了一下，找到了這個 [issue](https://github.com/freqtrade/freqtrade/issues/4281)，原因可能是 numpy 版本需要更新。我原本的 numpy 版本是 1.19.5，執行 `pip install numpy --upgrade` 更新到 1.21.2 就好了。
-
-
-
