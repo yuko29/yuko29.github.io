@@ -3,7 +3,7 @@ title: "Xv6 Environment Setup"
 date: 2022-07-27T02:33:17+08:00
 categories: ['xv6']
 tags: []
-draft: true
+draft: false
 ---
 
 紀錄在 Mac 系統上安裝 Xv6 環境的過程。  
