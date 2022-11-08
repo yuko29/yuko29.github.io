@@ -33,7 +33,7 @@ conda activate tvm-build
 
 3. 編輯 cmake configuration
 
-```
+```bash
 mkdir build
 cp cmake/config.cmake build
 ```
@@ -247,3 +247,10 @@ TVM_DLL int32_t tvmgen_default_cmsis_nn_main_0(int8_t* input_, int8_t* filter_, 
 }
 ...
 ```
+
+## Reference
+
+[TVM - Install from Source](https://tvm.apache.org/docs/install/from_source.html)  
+[TVM - Running TVM on bare metal Arm(R) Cortex(R)-M55 CPU and Ethos(TM)-U55 NPU with CMSIS-NN](https://tvm.apache.org/docs/how_to/work_with_microtvm/micro_ethosu.html)  
+[TVM - Model Library Format](https://tvm.apache.org/docs/arch/model_library_format.html)  
+[Running TVM on bare metal Arm(R) Cortex(R)-M55 CPU and CMSIS-NN](https://github.com/apache/tvm/tree/main/apps/microtvm/cmsisnn)  
