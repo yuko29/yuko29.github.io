@@ -2,7 +2,7 @@
 title: "Building Tensorflow From Source"
 date: 2021-09-12T18:21:01+08:00
 categories: ["tensorflow"]
-tags: []
+tags: ["build"]
 draft: false
 
 ---

@@ -2,7 +2,7 @@
 title: "Build TVM From Source and Codegen"
 date: 2022-11-08T22:05:58+08:00
 categories: ["tvm"]
-tags: []
+tags: ["build"]
 draft: false
 ---
 
