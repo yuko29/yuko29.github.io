@@ -3,7 +3,7 @@ title: "Build LLVM and clang From Source"
 date: 2023-02-16T23:19:09+08:00
 categories: ["LLVM"]
 tags: ["build", "clang", "LLVM"]
-draft: true
+draft: false
 ---
 
 紀錄 build LLVM 和 Clang 的過程。
