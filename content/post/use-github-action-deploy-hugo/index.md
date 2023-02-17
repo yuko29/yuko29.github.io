@@ -1,5 +1,5 @@
 ---
-title: "Use GitHub Action 將 Hugo 部署到 GitHub Page"
+title: "用 GitHub Action 將 Hugo 部署到 GitHub Page"
 date: 2021-06-10T02:30:43+08:00
 categories: ['DevOps']
 tags: ['github', 'hugo']
