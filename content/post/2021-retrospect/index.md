@@ -76,4 +76,4 @@ draft: false
 
 自從 9 月的時候就開始討論 CCCA 未來活動的籌辦，經過幾個月的討論和籌辦之後，在 1/12 辦了屬於我們的第一場活動：CCCA 職涯分享講座。這次活動除了籌備物資我也接下主持的工作，我覺得自己比去年主持 Hour of Code 時還要好很多，聲音有點抖但是不會腦內一片空白了。感謝所有參與籌備的夥伴：Jenny、Johnney、婷伃、柏宇、Terry，還有 Sophi、Jojo 和 yyc 的幫忙。希望明年社團可以慢慢茁壯起來！
 
-{{< figure src="/ccca-first-event.jpeg">}}
+{{< figure src="ccca-first-event.jpeg">}}
