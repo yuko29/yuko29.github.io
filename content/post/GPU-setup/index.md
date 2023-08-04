@@ -106,3 +106,54 @@ $ sudo cp cudnn-*-archive/include/cudnn*.h /usr/local/cuda/include
 $ sudo cp -P cudnn-*-archive/lib/libcudnn* /usr/local/cuda/lib64 
 $ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
 ```
+
+---
+
+## CUDA 降版
+
+最近要用 tensorflow==2.11.0 訓練模型時，被 report 找不到 `libcublas.so.11` 和其他三四個 lib，沒辦法上 GPU 訓練。心想奇怪之前明明就裝好 CUDA，怎麼會說沒有，結果把 CUDA 目錄下的 library 列出來一看，發現的確是有這個 `libcublas.so`，但卻是 `libcublas.so.12`。
+好哦，所以是我裝的 CUDA 太新了，需要降版。
+
+[Tensorflow 與適用 CUDA 的版本對照表](https://www.tensorflow.org/install/source#gpu)
+
+降版步驟：解除安裝舊 CUDA，安裝新 CUDA
+
+CUDA 安裝的時候自帶 uninstaller 程式，先用這個解安裝，再刪掉遺留檔案。
+```
+sudo /usr/local/cuda-12.0/bin/cuda-uninstaller
+sudo rm -r /usr/local/cuda-12.0/
+```
+
+下載 CUDA 11 並安裝。
+
+```
+sudo sh cuda_11.7.1_515.65.01_linux.run 
+```
+
+因為本機上已經安裝了 nvidia driver，安裝 CUDA 時它會告訴你 
+`Existing package manager installation of the driver found. It is strongly recommended that you remove this before continuing`，這時選擇 `continue`，在下一步把安裝 driver 的選項取消，不要安裝 driver。
+
+![](image.png)
+
+安裝完訊息如下：
+
+```
+= Summary =
+===========
+
+Driver:   Not Selected
+Toolkit:  Installed in /usr/local/cuda-11.7/
+
+Please make sure that
+ -   PATH includes /usr/local/cuda-11.7/bin
+ -   LD_LIBRARY_PATH includes /usr/local/cuda-11.7/lib64, or, add /usr/local/cuda-11.7/lib64 to /etc/ld.so.conf and run ldconfig as root
+
+To uninstall the CUDA Toolkit, run cuda-uninstaller in /usr/local/cuda-11.7/bin
+***WARNING: Incomplete installation! This installation did not install the CUDA Driver. A driver of version at least 515.00 is required for CUDA 11.7 functionality to work.
+To install the driver using this installer, run the following command, replacing <CudaInstaller> with the name of this run file:
+    sudo <CudaInstaller>.run --silent --driver
+```
+
+注意到下面的 WARNING，因為在安裝的時候沒裝 driver，它告訴你 driver 版本至少要 515.00 以上才能跑，我之前裝的 driver 版本是 `525.105.17`，有超過，測試過是可以跑成功的。如果 driver 版本不對，就需要重裝 driver 了。
+
+安裝 CuDNN 就和之前一樣去官網找對應版本下載即可。
