@@ -4,11 +4,7 @@ description: ""
 date: "2021-06-09"
 author: "yuko29"
 comments: false
-menu:
-    main: 
-        weight: -90
-        params:
-            icon: user
+
 ---
 
 我是 Yuko Hu， 喜歡研究電腦和各種新技術，目前交大資工所碩班在讀。  
