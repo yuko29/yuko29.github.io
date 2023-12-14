@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "http://yuko29.github.io/"
 languageCode = "en"
 defaultContentLanguage = "en"                             # en / zh-cn / ... (This field determines which i18n file to use)
 title = "Yuko's Note"
@@ -35,24 +35,25 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
   url = "/"
 [[menu.main]]
   name = "About"
-  weight = 15
+  weight = 20
   identifier = "about"
   url = "/about"
 [[menu.main]]
-  name = "Archives"
-  weight = 20
-  identifier = "archives"
-  url = "/post/"
+  name = "Categories"
+  weight = 30
+  identifier = "categories"
+  url = "/categories/"
 [[menu.main]]
   name = "Tags"
-  weight = 30
+  weight = 40
   identifier = "tags"
   url = "/tags/"
 [[menu.main]]
-  name = "Categories"
-  weight = 40
-  identifier = "categories"
-  url = "/categories/"
+  name = "Archives"
+  weight = 50
+  identifier = "archives"
+  url = "/post/"
+
 
 [params]
   version = "4.x"           # Used to give a friendly message when you have an incompatible update
@@ -187,7 +188,7 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
     alipay = "/path/to/your/alipay-qr-code.png"           # 支付宝二维码
 
   [params.social]                                         # 社交链接
-    a-email = "mailto:your@email.com"
+    a-email = "mailto:yuko29.hu@email.com"
     # b-stack-overflow = "http://localhost:1313"
     # c-twitter = "http://localhost:1313"
     # d-facebook = "http://localhost:1313"

@@ -18,7 +18,8 @@ Enviroment:
 ## Nvidia GPU driver
 
 一開始蠻疑惑要裝哪個版本的，網上各種裝法都有，看到蠻多人說裝 recommand 的就好，於是我也照做，裝了推薦的 nvidia-driver-530-open 版。
-```
+
+```bash
 $ ubuntu-drivers devices
 vendor   : NVIDIA Corporation 
 driver   : nvidia-driver-515 - distro non-free
@@ -40,14 +41,15 @@ driver   : xserver-xorg-video-nouveau - distro free builtin
 最後照在 reddit 上的這篇 post: [You want to use elementary os but have a nvidia card and problems with drivers?
 ](https://www.reddit.com/r/elementaryos/comments/10q99ib/you_want_to_use_elementary_os_but_have_a_nvidia/) 裝了 nvidia-driver-525 版。
 
-```
+```bash
 $ sudo su
 $ sudo apt install linux-headers-$(uname -r)
 $ apt-get install nvidia-driver-525
 reboot
 ```
 實測 nvidia-driver-525 有成功安裝並抓到顯卡。
-```
+
+```bash
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     |
 |-------------------------------+----------------------+----------------------+
@@ -74,7 +76,7 @@ reboot
 
 CUDA 安裝很簡單，去[官網](https://developer.nvidia.com/cuda-toolkit-archive) 按版本抓 Runfile 下來安裝就可以了。
 
-```
+```bash
 sudo sh cuda_12.0.1_525.85.12_linux.run 
 ```
 
@@ -87,7 +89,7 @@ export LD_LIBRARY_PATH="/usr/local/cuda-12.0/lib64:$LD_LIBRARY_PATH"
 
 看有沒有抓到 nvcc。
 
-```
+```bash
 $ nvcc -V
 nvcc: NVIDIA (R) Cuda compiler driver
 Copyright (c) 2005-2023 NVIDIA Corporation
@@ -101,7 +103,7 @@ Build cuda_12.0.r12.0/compiler.32267302_0
 CuDNN 我是去[官網](https://developer.nvidia.com/rdp/cudnn-download) 直接下載 tar file。
 解壓之後按照 [NVIDIA cuDNN Documentation](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#installlinux-tar) 指示把 source 和 lib 裝到 cuda 目錄下面。 
 
-```
+```bash
 $ sudo cp cudnn-*-archive/include/cudnn*.h /usr/local/cuda/include 
 $ sudo cp -P cudnn-*-archive/lib/libcudnn* /usr/local/cuda/lib64 
 $ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
@@ -126,7 +128,7 @@ sudo rm -r /usr/local/cuda-12.0/
 
 下載 CUDA 11 並安裝。
 
-```
+```bash
 sudo sh cuda_11.7.1_515.65.01_linux.run 
 ```
 
