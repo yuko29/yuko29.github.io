@@ -3,7 +3,7 @@ title: "About"
 description: ""
 date: "2021-06-09"
 author: "yuko29"
-disqus: false
+comment: false
 
 ---
 
