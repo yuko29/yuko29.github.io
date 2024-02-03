@@ -5,7 +5,7 @@ title = "Yuko's Note"
 preserveTaxonomyNames = true
 enableRobotsTXT = true
 enableEmoji = true
-theme = "even"
+theme = 'even'
 enableGitInfo = false # use git commit log to generate lastmod record # 可根据 Git 中的提交生成最近更新记录。
 
 # Syntax highlighting by Chroma. NOTE: Don't enable `highlightInClient` and `chroma` at the same time!
@@ -21,7 +21,7 @@ googleAnalytics = ""      # UA-XXXXXXXX-X
 copyright = ""            # default: author.name ↓        # 默认为下面配置的author.name ↓
 
 [author]                  # essential                     # 必需
-  name = "yuko29"
+  name = "Yuko Hu"
 
 [sitemap]                 # essential                     # 必需
   changefreq = "weekly"
@@ -88,17 +88,18 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
   # Some global options, you can also close or open something in front matter for a single post, see more information from `archetypes/default.md`.
   toc = true                                                                            # 是否开启目录
   autoCollapseToc = false   # Auto expand and collapse toc                              # 目录自动展开/折叠
-  fancybox = true           # see https://github.com/fancyapps/fancybox                 # 是否启用fancybox（图片可点击）
+  fancybox = false           # see https://github.com/fancyapps/fancybox                 # 是否启用fancybox（图片可点击）
 
+  math = true
   # mathjax
-  mathjax = false           # see https://www.mathjax.org/                              # 是否使用mathjax（数学公式）
+  mathjax = true           # see https://www.mathjax.org/                              # 是否使用mathjax（数学公式）
   mathjaxEnableSingleDollar = false                                                     # 是否使用 $...$ 即可進行inline latex渲染
   mathjaxEnableAutoNumber = false                                                       # 是否使用公式自动编号
   mathjaxUseLocalFiles = false  # You should install mathjax in `your-site/static/lib/mathjax`
 
   postMetaInFooter = true   # contain author, lastMod, markdown link, license           # 包含作者，上次修改时间，markdown链接，许可信息
   linkToMarkDown = false    # Only effective when hugo will output .md files.           # 链接到markdown原始文件（仅当允许hugo生成markdown文件时有效）
-  contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'     # e.g. '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'
+  contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hant" target="_blank">CC BY-SA 4.0</a>'     # e.g. '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'
 
   changyanAppid = ""        # Changyan app id             # 畅言
   changyanAppkey = ""       # Changyan app key
@@ -204,6 +205,15 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
     # n-gitlab = "http://localhost:1313"
     # o-bilibili = "http://localhost:1313"
 
+  [params.HugoShortcodes.BuyMeACoffee]
+    Slug = "yuko29"
+    Text = 'Buy me a coffee'
+    Font = 'Comic'
+    ButtonColor = 'ffdd00'
+    FontColor = '000000'
+    CoffeeColor = 'ffffff'
+    CupColor = '000000'
+
 # See https://gohugo.io/about/hugo-and-gdpr/
 [privacy]
   [privacy.googleAnalytics]
@@ -215,8 +225,15 @@ copyright = ""            # default: author.name ↓        # 默认为下面配
 [markup]
   [markup.tableOfContents]
     startLevel = 1
-  [markup.goldmark.renderer]
-    unsafe = true
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+    [markup.goldmark.extensions]
+      [markup.goldmark.extensions.passthrough]
+        enable = true
+        [markup.goldmark.extensions.passthrough.delimiters]
+            block = [['\[', '\]'], ['$$', '$$']]
+            inline = [['\(', '\)']]
 
 # 将下面这段配置取消注释可以使 hugo 生成 .md 文件
 # Uncomment these options to make hugo output .md files.

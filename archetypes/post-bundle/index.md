@@ -10,3 +10,6 @@ draft: true
 <!--more-->
 
 ## h2
+
+
+{{< bmc-button slug="yuko29" >}}
