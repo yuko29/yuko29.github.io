@@ -1,7 +1,7 @@
 baseURL = "http://yuko29.github.io/"
 languageCode = "en"
 defaultContentLanguage = "en"                             # en / zh-cn / ... (This field determines which i18n file to use)
-title = "Yuko's Note"
+title = "Yuko29's Note"
 preserveTaxonomyNames = true
 enableRobotsTXT = true
 enableEmoji = true
@@ -19,6 +19,10 @@ paginate = 5                                              # 首页每页显示�
 disqusShortname = "yuko29"      # disqus_shortname
 googleAnalytics = ""      # UA-XXXXXXXX-X
 copyright = ""            # default: author.name ↓        # 默认为下面配置的author.name ↓
+
+[services]
+  [services.googleAnalytics]
+    id = 'G-NC0VXE56DE'
 
 [author]                  # essential                     # 必需
   name = "Yuko Hu"
