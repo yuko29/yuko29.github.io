@@ -262,5 +262,3 @@ LLM 本身如同一個不知道有幾面的多面體，我認為要完備的評�
 - [语言模型中的常用评估指标](http://giantpandacv.com/project/PyTorch/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E5%B8%B8%E7%94%A8%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87/)
 - [lm-evaluation-harnessの評価指標まとめ](https://zenn.dev/hijikix/articles/28a134e41d7e75)
 
-
-{{< bmc-button slug="yuko29" >}}
