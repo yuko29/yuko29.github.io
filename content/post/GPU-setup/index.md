@@ -11,7 +11,7 @@ draft: false
 <!--more-->
 
 Enviroment:
-- Elementary OS 7
+- Elementary OS 7.1 Horus
 - Nvidia RTX 3060
 - Kernel release: 5.15.0-58-generic
 
@@ -72,6 +72,19 @@ reboot
 
 ```
 
+### Kernel 升級
+
+(2024.3.7 Update)  
+
+前陣子 kernel 升級 6.5.0-15-generic，發現 nvidia driver 動不了了。後來又發現 driver 一直編譯不成功，查了 `/var/lib/dkms/nvidia/525.147.05/build/make.log` 看到 gcc 編譯錯誤：
+
+```bash
+gcc: error: unrecognized command-line option ‘-ftrivial-auto-var-init=zero’
+```
+
+爬了文才知道是 [gcc 版本問題](https://unix.stackexchange.com/questions/766795/unrecognized-command-line-option-ftrivial-auto-var-init-zero-when-building-ke)，6.5 版 kernel 是用 gcc-12 編譯的關係，原本機器上是用 gcc-11 編譯。把 gcc 換成 gcc-12 後重新載 driver 就解決了。[參考資料](https://askubuntu.com/questions/1500017/ubuntu-22-04-default-gcc-version-does-not-match-version-that-built-latest-defaul)
+
+
 ## CUDA
 
 CUDA 安裝很簡單，去[官網](https://developer.nvidia.com/cuda-toolkit-archive) 按版本抓 Runfile 下來安裝就可以了。
@@ -82,7 +95,7 @@ sudo sh cuda_12.0.1_525.85.12_linux.run
 
 設定環境變數。
 
-```
+```bash
 export PATH="/usr/local/cuda-12.0/bin:$PATH"
 export LD_LIBRARY_PATH="/usr/local/cuda-12.0/lib64:$LD_LIBRARY_PATH"
 ```
@@ -121,7 +134,8 @@ $ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn
 降版步驟：解除安裝舊 CUDA，安裝新 CUDA
 
 CUDA 安裝的時候自帶 uninstaller 程式，先用這個解安裝，再刪掉遺留檔案。
-```
+
+```bash
 sudo /usr/local/cuda-12.0/bin/cuda-uninstaller
 sudo rm -r /usr/local/cuda-12.0/
 ```
