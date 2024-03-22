@@ -1,0 +1,6 @@
+<!-- <img src="{{ .Get `src` }}"> -->
+{{ $img := .Get `src` }}
+{{ $image := .Page.Resources.GetMatch $img }}
+{{ with $image }}
+  <img src="{{ .RelPermalink }}" style="display:block; margin:auto" >
+{{ end }}
