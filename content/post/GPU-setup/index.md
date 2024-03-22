@@ -84,6 +84,33 @@ gcc: error: unrecognized command-line option ‘-ftrivial-auto-var-init=zero’
 
 爬了文才知道是 [gcc 版本問題](https://unix.stackexchange.com/questions/766795/unrecognized-command-line-option-ftrivial-auto-var-init-zero-when-building-ke)，6.5 版 kernel 是用 gcc-12 編譯的關係，原本機器上是用 gcc-11 編譯。把 gcc 換成 gcc-12 後重新載 driver 就解決了。[參考資料](https://askubuntu.com/questions/1500017/ubuntu-22-04-default-gcc-version-does-not-match-version-that-built-latest-defaul)
 
+### 清除 nvidia driver
+
+(2024.3.22 Update)
+
+需要重裝 driver 時，把現有 driver 清乾淨的好用指令：
+
+```bash
+sudo apt-get --purge *nvidia*
+sudo apt-get autoremove
+```
+
+確認沒有任何殘留：
+```bash
+dpkg -l | grep nvidia
+```
+
+如果重裝 driver 後，`nvidia-smi` 出現以下 error:
+```
+Failed to initialize NVML: Driver/library version mismatch
+```
+可能需要將電腦 reboot 讓 kernel 載入新的 nvidia kernel module (nvidia kernel module 和 library 是分開的，剛下載完系統 kernel 裡還是舊 module)。
+
+如果重開機後還是出現 error，我曾經碰到過的狀況是 kernel 一直載入舊 module，解法是強制重新編譯 nvidia driver 解決。（使用上述 `apt install <nvidia-driver>` 安裝)。
+
+{{% admonition tip "Tip" %}}
+Build from source 解決一切問題。
+{{% /admonition %}}
 
 ## CUDA
 
