@@ -1,8 +1,8 @@
 ---
 title: "Building Tensorflow From Source"
 date: 2021-09-12T18:21:01+08:00
-categories: ["tensorflow"]
-tags: ["build"]
+categories: ["Deep Learning"]
+tags: ["build", "tensorflow"]
 draft: false
 
 ---

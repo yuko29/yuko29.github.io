@@ -1,7 +1,7 @@
 ---
 title: "Xv6 Environment Setup"
 date: 2022-07-27T02:33:17+08:00
-categories: ['xv6']
+categories: ['os']
 tags: []
 draft: false
 ---

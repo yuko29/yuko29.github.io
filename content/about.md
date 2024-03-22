@@ -10,7 +10,7 @@ comment: false
 ## About Me
 
 我是 Yuko Hu，喜歡研究電腦和各種新技術。  
-大學在交大主修資訊工程，目前在讀研究所，研究領域是 Efficient AI。 
+目前在當研究生，研究 Efficient AI。 
 
 平常的興趣閱讀和看動畫，最喜歡的動漫作品是火影忍者。  
 
