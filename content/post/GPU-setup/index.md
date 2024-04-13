@@ -6,11 +6,13 @@ tags: ['GPU', 'CUDA']
 draft: false
 ---
 
-紀錄裝 Nvidia GPU driver、CUDA、CuDNN 的過程。
+紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。
+而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。
 
 <!--more-->
 
 Enviroment:
+
 - Elementary OS 7.1 Horus
 - Nvidia RTX 3060
 - Kernel release: 5.15.0-58-generic
@@ -47,6 +49,7 @@ $ sudo apt install linux-headers-$(uname -r)
 $ apt-get install nvidia-driver-525
 reboot
 ```
+
 實測 nvidia-driver-525 有成功安裝並抓到顯卡。
 
 ```bash
@@ -96,14 +99,17 @@ sudo apt-get autoremove
 ```
 
 確認沒有任何殘留：
+
 ```bash
 dpkg -l | grep nvidia
 ```
 
 如果重裝 driver 後，`nvidia-smi` 出現以下 error:
+
 ```
 Failed to initialize NVML: Driver/library version mismatch
 ```
+
 可能需要將電腦 reboot 讓 kernel 載入新的 nvidia kernel module (nvidia kernel module 和 library 是分開的，剛下載完系統 kernel 裡還是舊 module)。
 
 如果重開機後還是出現 error，我曾經碰到過的狀況是 kernel 一直載入舊 module，解法是強制重新編譯 nvidia driver 解決。（使用上述 `apt install <nvidia-driver>` 安裝)。
@@ -111,6 +117,78 @@ Failed to initialize NVML: Driver/library version mismatch
 {{% admonition tip "Tip" %}}
 Build from source 解決一切問題。
 {{% /admonition %}}
+
+### 關閉自動更新
+
+(2024.4.13 Update)
+
+Ubuntu 會自動更新系統和套件，有時會連顯卡驅動一起更新，導致顯卡無法使用。
+
+```bash
+$ nvidia-smi
+Failed to initialize NVML: Driver/library version mismatch
+```
+
+#### 排查方法
+
+檢查 dpkg 更新紀錄：
+
+```bash
+$ cat /var/log/dpkg.log | grep nvidia | grep upgrade
+...
+2024-04-13 06:30:46 upgrade libnvidia-decode-535-server:amd64 535.161.07-0ubuntu0.20.04.1 535.161.08-0ubuntu2.20.04.1                                                                    
+2024-04-13 06:30:47 upgrade libnvidia-compute-535-server:amd64 535.161.07-0ubuntu0.20.04.1 535.161.08-0ubuntu2.20.04.1   
+...
+```
+
+發現 driver 版本從 `535.161.07` 升到 `535.161.08` 了
+
+查看系統 nvidia driver 版本：
+
+```bash
+$ cat /proc/driver/nvidia/version
+NVRM version: NVIDIA UNIX x86_64 Kernel Module  535.161.07  Sat Feb 17 22:55:48 UTC 2024
+GCC version:  gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2) 
+```
+
+發現系統內的 driver 還在 `535.161.07`。
+
+查看下載的 nvidia driver 版本：
+
+```bash
+$ apt list --installed | grep nvidia 
+nvidia-dkms-535-server/focal-updates,focal-security,now 535.161.08-0ubuntu2.20.04.1 amd64 [installed,automatic]
+nvidia-driver-535-server/focal-updates,focal-security,now 535.161.08-0ubuntu2.20.04.1 amd64 [installed,automatic]
+...
+```
+
+下載下來安裝的 driver 已經是 `535.161.08`，並且是被自動更新的。
+
+這個指令也可以查看下載的 nvidia driver 版本：
+
+```bash
+dpkg -l | grep -i nvidia
+```
+
+這時候只需要重新開機就可以加載新的 driver 進系統了。但是 server 的系統常常更新 driver 很令人困擾，可以關閉自動更新解決。
+
+幫 driver 鎖定版本不讓它被自動更新：
+
+```bash
+sudo apt-mark hold nvidia-driver-535-server
+```
+
+解除鎖定：
+
+```bash
+sudo apt-mark unhold nvidia-driver-535-server
+```
+
+查看鎖定版本的套件：
+
+```bash
+apt-mark showhold
+```
 
 ## CUDA
 
