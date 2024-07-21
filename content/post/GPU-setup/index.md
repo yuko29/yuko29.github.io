@@ -37,6 +37,7 @@ driver   : nvidia-driver-515-server - distro non-free
 driver   : nvidia-driver-525-server - distro non-free
 driver   : xserver-xorg-video-nouveau - distro free builtin
 ```
+
 結果不但抓不到顯卡，連叫 nvidia-smi 還會讓 kernel 不明原因當掉...。  
 說明 recommand 就只是 recommand。
 
@@ -192,7 +193,7 @@ apt-mark showhold
 
 ## CUDA
 
-CUDA 安裝很簡單，去[官網](https://developer.nvidia.com/cuda-toolkit-archive) 按版本抓 Runfile 下來安裝就可以了。
+CUDA 安裝很簡單，去[官網](https://developer.nvidia.com/cuda-toolkit-archive)按版本抓 Runfile 下來安裝就可以了。
 
 ```bash
 sudo sh cuda_12.0.1_525.85.12_linux.run 
@@ -229,7 +230,9 @@ $ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn
 
 ---
 
-## CUDA 降版
+## Trouble shooting
+
+### CUDA 降版
 
 最近要用 tensorflow==2.11.0 訓練模型時，被 report 找不到 `libcublas.so.11` 和其他三四個 lib，沒辦法上 GPU 訓練。心想奇怪之前明明就裝好 CUDA，怎麼會說沒有，結果把 CUDA 目錄下的 library 列出來一看，發現的確是有這個 `libcublas.so`，但卻是 `libcublas.so.12`。
 好哦，所以是我裝的 CUDA 太新了，需要降版。
@@ -278,3 +281,11 @@ To install the driver using this installer, run the following command, replacing
 注意到下面的 WARNING，因為在安裝的時候沒裝 driver，它告訴你 driver 版本至少要 515.00 以上才能跑，我之前裝的 driver 版本是 `525.105.17`，有超過，測試過是可以跑成功的。如果 driver 版本不對，就需要重裝 driver 了。
 
 安裝 CuDNN 就和之前一樣去官網找對應版本下載即可。
+
+### 缺少 NVCC
+
+有些機器上可能預裝有 CUDA 但是 toolkit 不齊全，例如少了 NVCC 導致沒辦法編譯某些套件。在沒有權限能重裝 cuda toolkit 的情況下，可以用 [conda](https://anaconda.org/nvidia/cuda-toolkit) 在把 toolkit 下載在虛擬環境內。
+
+```bash
+conda install nvidia/label/cuda-12.1.0::cuda-toolkit
+```
