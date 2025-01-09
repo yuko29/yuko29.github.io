@@ -1,0 +1,177 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>LLM Evaluation - Yuko's Note</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Yuko Hu"><meta name=description content="如何評估 LLM 的能力？來看看學術界目前如何實作。
+"><meta name=keywords content="Yuko,yuko29"><meta name=generator content="Hugo 0.129.0 with theme even"><link rel=canonical href=http://yuko29.github.io/post/llm_evaluation/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href=/sass/main.min.65ba10c33328e29aa9919dd2d128178677d70bcc8e284e9829109ce84f8bb988.css rel=stylesheet><meta property="og:url" content="http://yuko29.github.io/post/llm_evaluation/"><meta property="og:site_name" content="Yuko's Note"><meta property="og:title" content="LLM Evaluation"><meta property="og:description" content="如何評估 LLM 的能力？來看看學術界目前如何實作。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2024-02-03T02:16:38+08:00"><meta property="article:modified_time" content="2024-02-03T02:16:38+08:00"><meta property="article:tag" content="LLM"><meta itemprop=name content="LLM Evaluation"><meta itemprop=description content="如何評估 LLM 的能力？來看看學術界目前如何實作。"><meta itemprop=datePublished content="2024-02-03T02:16:38+08:00"><meta itemprop=dateModified content="2024-02-03T02:16:38+08:00"><meta itemprop=wordCount content="3498"><meta itemprop=keywords content="LLM"><meta name=twitter:card content="summary"><meta name=twitter:title content="LLM Evaluation"><meta name=twitter:description content="如何評估 LLM 的能力？來看看學術界目前如何實作。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Yuko's Note</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/about><li class=mobile-menu-item>About</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Yuko's Note</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/about>About</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>LLM Evaluation</h1><div class=post-meta><span class=post-time>2024-02-03</span><div class=post-category><a href=/categories/deep-learning/>Deep Learning</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><ul><li><a href=#intro>Intro</a></li><li><a href=#lm-evaluation-harness>LM Evaluation Harness</a></li><li><a href=#the-way-to-llm-evaluation>The way to LLM evaluation</a><ul><li><a href=#1-zero-shot--few-shot>1. Zero-shot & Few-shot</a></li><li><a href=#2-top-k--top-p>2. Top-k & Top-p</a></li><li><a href=#3-temperature>3. Temperature</a></li></ul></li><li><a href=#metric>Metric</a><ul><li><a href=#1-perplexity>1. Perplexity</a></li><li><a href=#2-accuracy>2. Accuracy</a></li><li><a href=#3-accuracy-norm>3. Accuracy Norm</a></li></ul></li><li><a href=#ending>Ending</a></li><li><a href=#reference>Reference</a></li></ul></li></ul></nav></div></div><div class=post-content><p>如何評估 LLM 的能力？來看看學術界目前如何實作。</p><div class="admonition abstract"><p class=admonition-title>目的</p><p>主要以學術研究的角度切入討論。</p><ul><li>如何評估 LLM 的能力</li><li>了解 LLM 如何生成文本</li><li>了解如何解讀技術報告裡的數據</li></ul></div><h2 id=intro>Intro</h2><p>LLM 的能力評估方式到目前在學界其實還是一個 open question，並沒有一個絕對的指標能夠完美的衡量一個 LLM 的能力。這個「能力」到底如何定義？這個能力終究是來自於我們希望 LLM 能夠做到的事，從我們會問 ChatGPT 的內容能夠知道我們關心哪些能力大概有哪些：</p><ul><li>做學科題目</li><li>寫 code</li><li>產生各類文案</li></ul><p>因此不論是在 GPT 或是 LLaMA 的技術報告內，都是列出模型在多個不同面向的任務（task）上的準確度如何，來給出一個量化的數據呈現模型的能力。必須要注意，在解讀這些數字的時候要切記一點：任務的準確度只能反應模型在這項任務範疇內的表現。由此也可以理解為什麼報告內會列這麼多任務，就是為了要呈現出這個 LLM 它在各個面向表現的都很好。</p><p>但反過來想，是不是所有任務都要全部都測過一次，才可以有信心的說明這個模型很厲害呢？<br>聽起來很合理，但是這些任務五花八門數量又很多，不太可能全部都測過，除非時間跟資源太多。因此，大家會去測幾個公認比較具有代表性的任務，來和別人比較自己的 LLM 能力。例如 MMLU，HellaSwag 等等，相當於是讓 LLM 去做各式各樣的題目來評估模型的能力。</p><p>所以，以目前的現有的方法來說，如果要量化評估 pretrained LLM 的能力的話，必須得透過任務這個媒介。選定一些任務作為評估能力的標準，從各方面衡量模型的表現，也才能夠在相同的基準點上公平地與其他 LLM 模型比較。</p><h2 id=lm-evaluation-harness>LM Evaluation Harness</h2><p>目前學術界論文中，大多是使用
+<a href=https://www.eleuther.ai/>EleutherAI</a> 所開發的 <a href=https://github.com/EleutherAI/lm-evaluation-harness>LM Evaluation Harness</a> 這個工具來做 LLM 評測。它集成了許多常見的任務，可以透過 script 設定一次測試多個 task，十分方便。</p><h2 id=the-way-to-llm-evaluation>The way to LLM evaluation</h2><p>在下去做 LLM 評測之前，有些重要的必備知識得先了解。</p><h3 id=1-zero-shot--few-shot>1. Zero-shot & Few-shot</h3><p><a href=https://promptingguide.azurewebsites.net/techniques/fewshot>Few-shot prompting</a> 是來自 In-Context Learning 這個概念，表面上似乎是 LLM 模型能讀懂上下文做出更好的回答。具體來說，就是能夠藉由 prompting 限縮 LLM 的回答範圍，讓 LLM 能夠回答出我們期望的答案。因此，研究者們發現，如果在想要給 LLM 做的題目前先給 LLM 幾個題目和回答範例，有助於 LLM 回答的正確性。</p><p>在 MMLU task 的評測中，目前習慣會用 5-shot 設定，也就是將真正要問的題目接在五個範例後面，一起作為 input 輸入 LLM，具體方式如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>        &lt;input&gt;                  # train
+</span></span><span class=line><span class=cl>        A. &lt;reference&gt;
+</span></span><span class=line><span class=cl>        B. &lt;reference&gt;
+</span></span><span class=line><span class=cl>        C. &lt;reference&gt;
+</span></span><span class=line><span class=cl>        D. &lt;reference&gt;
+</span></span><span class=line><span class=cl>        Answer: &lt;A/B/C/D&gt;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        x N (N-shot)
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        &lt;input&gt;                  # test
+</span></span><span class=line><span class=cl>        A. &lt;reference1&gt;
+</span></span><span class=line><span class=cl>        B. &lt;reference2&gt;
+</span></span><span class=line><span class=cl>        C. &lt;reference3&gt;
+</span></span><span class=line><span class=cl>        D. &lt;reference4&gt;
+</span></span><span class=line><span class=cl>        Answer:
+</span></span></code></pre></td></tr></table></div></div><p>1-shot 實例：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        The pleura
+</span></span><span class=line><span class=cl>        A. have no sensory innervation.
+</span></span><span class=line><span class=cl>        B. are separated by a 2 mm space.
+</span></span><span class=line><span class=cl>        C. extend into the neck.
+</span></span><span class=line><span class=cl>        D. are composed of respiratory epithelium.
+</span></span><span class=line><span class=cl>        Answer: C
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        Which of the following terms describes the body&#39;s ability to maintain its normal state?
+</span></span><span class=line><span class=cl>        A. Anabolism
+</span></span><span class=line><span class=cl>        B. Catabolism
+</span></span><span class=line><span class=cl>        C. Tolerance
+</span></span><span class=line><span class=cl>        D. Homeostasis
+</span></span><span class=line><span class=cl>        Answer:
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Target: D
+</span></span></code></pre></td></tr></table></div></div><p>而所謂的 zero-shot evaluation，就是指不給任何範例，讓 LLM 直接作答。這是最嚴苛的設定，也是目前學術論文中，普遍用來評測一個 pretrained LLM 的方式。</p><div class="admonition info"><p class=admonition-title>few-shot 歧義</p><p>這裡的 few-shot prompting 與 few-shot fine-tuning 是不同的，前者只靠 prompting 不需要訓練模型，後者則需要，並且與
+few-shot learning （from meta learning）是完全不同的兩個概念。</p></div><h3 id=2-top-k--top-p>2. Top-k & Top-p</h3><p>LLM 會給出下一個詞的預測，也就是各個詞的機率分佈，要怎麼根據這些機率選擇下一個詞，稱為 Decode strategy。直接選擇機率最高的詞不一定是最好的（Greedy Decoding），詳細可以參考這篇<a href="https://www.zhihu.com/tardis/zm/art/647813179?source_id=1003">文章</a>。</p><ul><li>Top-k sampling: 只考慮前 k 個機率最大的詞進行抽樣</li><li>Top-p sampling: 只考慮前幾個加起來機率是 p 的詞，從裡面進行抽樣</li></ul><p>由此可以增加生成文字的隨機性，這也解釋了為什麼我們在問 ChatGPT 的時候它每次回答都會不太一樣。<br>如果 Top-k 和 Top-p 都啟用，則通常會設定 Top-p 在 Top-k 之後起作用。</p><h3 id=3-temperature>3. Temperature</h3><p>LLM 的超參數 T，用於控制生成文本的隨機性，也是一種 Decode strategy。</p><p>LLM 輸出是詞彙表中每個 token 的機率分佈，由 softmax 計算產生此機率分佈 P，也就是對 logits 做 softmax：</p><p>(logits: 如今通常是指模型最後一層的輸出，這個說法有些歧義，詳見<a href=https://www.zhihu.com/question/60751553>此處</a>)</p>$$
+p \left( x_i \right) = \frac{e^{x_i}}{\Sigma^V_{j=1}e^{x_j}}
+$$<p>Temperature 參數（T）用於在 softmax 時調整 logits：</p>$$
+p \left( x_i \right) = \frac{e^{\frac{x_i}{T}}}{\Sigma^V_{j=1}e^{\frac{x_j}{T}}}
+$$<p>通常設置 0.1 到 1.0 之間，T 設越小，機率差異會被放大，結果越確定；T 設越大，分佈越平均，結果越隨機。在使用上，可以依據需要調整 temperature。</p><p>不過，在學術論文中，使用 LM Evaluation Harness 做 zero-shot evalution 的部份，並沒有看到過有作者特別說明 temperature 和 top-k & top-p 設定。如果要確保數據能重現的話，應該是沒有設 temperature 的。也有可能是，做題的時候不要有隨機性比較好。</p><p>LM Evaluation Harness 在沒有指定 temperature 的情況下預設是不會使用這個參數的 (<a href=https://github.com/EleutherAI/lm-evaluation-harness/blob/994bdb3fd3780110e45f479f5f409cae05e089bd/lm_eval/models/huggingface.py#L717>source code</a>)。</p><p>題外話，LLaMA-2 模型發布的時候有給 <code>generation_config.json</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>  &#34;bos_token_id&#34;: 1,
+</span></span><span class=line><span class=cl>  &#34;do_sample&#34;: true,
+</span></span><span class=line><span class=cl>  &#34;eos_token_id&#34;: 2,
+</span></span><span class=line><span class=cl>  &#34;pad_token_id&#34;: 0,
+</span></span><span class=line><span class=cl>  &#34;temperature&#34;: 0.6,
+</span></span><span class=line><span class=cl>  &#34;max_length&#34;: 4096,
+</span></span><span class=line><span class=cl>  &#34;top_p&#34;: 0.9,
+</span></span><span class=line><span class=cl>  &#34;transformers_version&#34;: &#34;4.31.0.dev0&#34;
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>沒特別設定的話，用 huggingface transformers 加載模型就會吃這個設定。</p><h2 id=metric>Metric</h2><p>LLM 領域中，以壓縮為目的的論文，通常在 LLM 的能力評估上會比兩種指標：perplexity 和 task accuracy。</p><h3 id=1-perplexity>1. Perplexity</h3><p><a href=https://docs.kolena.io/metrics/perplexity/>Perplexity</a>，簡稱 PPL，翻譯成困惑度，是衡量模型在 Language Modeling 任務能力的指標。PPL 反應的是模型預測字的能力。在訓練一個語言模型的時候，我們期待 LLM 能夠產生文字合理的句子，於是希望它在做 text generation 時，能夠接出與 training sample 一樣的句子，而 PPL 就是在衡量模型預測結果的機率組合和原句子的差異性。</p><p>Perplexity 的數學定義如下：</p><blockquote><p>Perplexity is defined as the exponential of the negative log-likelihood of a sequence.</p>$$ \text{perplexity} = exp \left( -\frac{1}{t} \\ \sum\limits_1^t \\ \text{log} \\ p_{ \theta } \left( x_i | x_{context} \right) \right)$$</blockquote><p>講白話一點就是 LLM 話說的好不好，loss 越小，PPL 值就越小，表示模型能力越好。</p><p>這裡有<a href=https://www.educative.io/answers/what-is-perplexity-in-nlp>完整的 code 範例</a>，教導如何使用 huggingface transformer 算 PPL。</p><div class="admonition warning"><p class=admonition-title>warning</p><p>Text preprocessing 和 sequence length 都會影響 PPL 的值，比較時須在同樣的設定下測量。</p></div><p>另外，對不同的 dataset 量測 PPL，只是反應模型在該 dataset 上的預測程度，因此，在某個 dataset 上 PPL 大不能直接推論該 LLM 綜合能力就差。</p><h3 id=2-accuracy>2. Accuracy</h3><p>Accuracy，簡稱 acc，在常見的 zero-shot task 大多是以題目形式為主，所以衡量方法就是看答對率。</p><p>下面是 LM Evaluation Harness 跑出來的結果範例。</p><p>Zero-shot tasks:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>|    Tasks    |Version|Filter|n-shot| Metric |Value |   |Stderr|                                                                                     
+</span></span><span class=line><span class=cl>|-------------|-------|------|-----:|--------|-----:|---|-----:|                                                                                     
+</span></span><span class=line><span class=cl>|arc_challenge|Yaml   |none  |     0|acc     |0.3217|±  |0.0137|                                                                                     
+</span></span><span class=line><span class=cl>|             |       |none  |     0|acc_norm|0.3481|±  |0.0139|                                                                                     
+</span></span><span class=line><span class=cl>|arc_easy     |Yaml   |none  |     0|acc     |0.6700|±  |0.0096|                                                                                     
+</span></span><span class=line><span class=cl>|             |       |none  |     0|acc_norm|0.6077|±  |0.0100|                                                                                     
+</span></span><span class=line><span class=cl>|boolq        |Yaml   |none  |     0|acc     |0.6835|±  |0.0081|                                                                                     
+</span></span><span class=line><span class=cl>|hellaswag    |Yaml   |none  |     0|acc     |0.4703|±  |0.0050|                                                                                     
+</span></span><span class=line><span class=cl>|             |       |none  |     0|acc_norm|0.6228|±  |0.0048|                                                                                     
+</span></span><span class=line><span class=cl>|openbookqa   |Yaml   |none  |     0|acc     |0.2760|±  |0.0200|                                                                                     
+</span></span><span class=line><span class=cl>|             |       |none  |     0|acc_norm|0.4160|±  |0.0221|                                                                                     
+</span></span><span class=line><span class=cl>|piqa         |Yaml   |none  |     0|acc     |0.7285|±  |0.0104|                                                                                     
+</span></span><span class=line><span class=cl>|             |       |none  |     0|acc_norm|0.7372|±  |0.0103|                                                                                     
+</span></span><span class=line><span class=cl>|winogrande   |Yaml   |none  |     0|acc     |0.6251|±  |0.0136|
+</span></span></code></pre></td></tr></table></div></div><p>5-shot MMLU task:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>|      Groups      |Version|Filter|n-shot|Metric|Value |   |Stderr|
+</span></span><span class=line><span class=cl>|------------------|-------|------|-----:|------|-----:|---|-----:|
+</span></span><span class=line><span class=cl>|mmlu              |N/A    |none  |     0|acc   |0.2745|±  |0.0509|
+</span></span><span class=line><span class=cl>| - humanities     |N/A    |none  |     5|acc   |0.2482|±  |0.0326|
+</span></span><span class=line><span class=cl>| - other          |N/A    |none  |     5|acc   |0.3025|±  |0.0502|
+</span></span><span class=line><span class=cl>| - social_sciences|N/A    |none  |     5|acc   |0.2746|±  |0.0524|
+</span></span><span class=line><span class=cl>| - stem           |N/A    |none  |     5|acc   |0.2858|±  |0.0638|
+</span></span></code></pre></td></tr></table></div></div><h3 id=3-accuracy-norm>3. Accuracy Norm</h3><p>在上面的結果中會看到，有些 task 會回報 <code>acc_norm</code>，這是什麼意思呢？</p><p>EleutherAI 的一篇 <a href=https://blog.eleuther.ai/multiple-choice-normalization/>blog post</a> 裡有給出說明：</p><blockquote><p>Byte-length normalized: The score of continuation i is determined using \(\sum\limits_{j=m}^{n_{i−1}} \text{log ⁡P}(x_j|x_{0:j})/\sum \limits_{j=m}^{n_{i−1}} \text{L}_{x_j}\), where \(\text{L}_{x_j}\) is the number of bytes represented by the token \(x_j\). This approach attempts to normalize for length by computing average log probability per character, which ensures that it is tokenization agnostic. This approach is also used by eval harness in all multiple choice tasks and presented as <code>acc_norm</code>.</p></blockquote><p>也就是對機率分佈 P 除以字串長度，以去除 tokenization 的影響。LM Evaluation Harness 在 multiple choice task 類別的任務裡有應用這個方法，對選項 token 長度做 normalization，其結果就是 <code>acc_norm</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>process_results</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>doc</span><span class=p>:</span> <span class=nb>dict</span><span class=p>,</span> <span class=n>results</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>Tuple</span><span class=p>[</span><span class=nb>float</span><span class=p>,</span> <span class=nb>bool</span><span class=p>]])</span> <span class=o>-&gt;</span> <span class=nb>dict</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>results</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=n>res</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=k>for</span> <span class=n>res</span> <span class=ow>in</span> <span class=n>results</span>
+</span></span><span class=line><span class=cl>    <span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>gold</span> <span class=o>=</span> <span class=n>doc</span><span class=p>[</span><span class=s2>&#34;gold&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>acc</span> <span class=o>=</span> <span class=mf>1.0</span> <span class=k>if</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>results</span><span class=p>)</span> <span class=o>==</span> <span class=n>gold</span> <span class=k>else</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>    <span class=n>completion_len</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=nb>float</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>i</span><span class=p>))</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>doc</span><span class=p>[</span><span class=s2>&#34;choices&#34;</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>    <span class=n>acc_norm</span> <span class=o>=</span> <span class=mf>1.0</span> <span class=k>if</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>results</span> <span class=o>/</span> <span class=n>completion_len</span><span class=p>)</span> <span class=o>==</span> <span class=n>gold</span> <span class=k>else</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;acc&#34;</span><span class=p>:</span> <span class=n>acc</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;acc_norm&#34;</span><span class=p>:</span> <span class=n>acc_norm</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>在某些任務上，<code>acc_norm</code> 的值會比較高，表示 LLM 在這個任務比較會受到選項長度影響。不過在目前我所看到的論文中，大部分的作者都是呈現 <code>acc</code>，而不是 <code>acc_norm</code>。不會在 LLM 的技術報告上有些數字看起來是 <code>acc_norm</code>，比較時需要留意。</p><h2 id=ending>Ending</h2><p>LLM 本身如同一個不知道有幾面的多面體，我認為要完備的評估它是不可能的事，只能用像這種多面推敲的方式來探索這個模型的能力。即使是這樣，現階段這些手段確實也能夠一定程度反應模型能力，但還有改善的空間。</p><p>本篇文章只有和涵蓋部份的 LLM evaluation 方法，其他像是 ROUGE 之類的 NLG 任務指標就沒講了，之後有機會再談吧。</p><blockquote><p>一些研究過程的 murmur。<br>2023 年，從 ChatGPT 釋出到 LLaMA 2 開源，各方團隊都在煉自家的 LLM，arXiv 上相關的論文也如噴湧而出。近期的研究工作也跨入了 LLM 領域，本身在 NLP 領域是新手，在紛亂的論文中蒐集資料實在吃盡苦頭。網路上雖然有些文章分享了 LLM 評估方法但都不夠詳細，包含已發表的論文也是，從規劃研究開始在評估方法方面就遇到巨大困擾，花了很多時間才找到對的 benchmark 和評估方法，跑出論文上的數字。數據是跑出來了，但有些疑惑漸漸浮現：</p><ul><li>這些 benchmark 到底能反應 LLM 多少程度的能力？</li><li>對於那些沒有列出來的任務，其表現又如何呢？</li></ul><p>為了解決這些疑惑，決定好好把這些任務指標和評測方法弄清楚。這使得我在後續理解論文數據的過程順暢很多。</p></blockquote><h2 id=reference>Reference</h2><ul><li><a href=https://medium.com/@amansinghalml_33304/temperature-llms-b41d75870510>Temperature — LLMs</a></li><li><a href=http://giantpandacv.com/project/PyTorch/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E5%B8%B8%E7%94%A8%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87/>语言模型中的常用评估指标</a></li><li><a href=https://zenn.dev/hijikix/articles/28a134e41d7e75>lm-evaluation-harnessの評価指標まとめ</a></li></ul><iframe class=LikeCoin height=235 src="https://button.like.co/in/embed/yuko2926846/button?referrer=http%3a%2f%2fyuko29.github.io%2fpost%2fllm_evaluation%2f" width=100% frameborder=0></iframe></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Yuko Hu</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2024-02-03</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hant target=_blank>CC BY-SA 4.0</a></span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/llm/>LLM</a></div><nav class=post-nav><a class=prev href=/post/multihead_attention/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">Multi-head Attention</span>
+<span class="prev-text nav-mobile">Prev</span>
+</a><a class=next href=/post/gpu-setup/><span class="next-text nav-default">GPU Setup on Elementary OS</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div><div id=disqus_thread></div><script type=text/javascript>(function(){if(window.location.hostname==="localhost")return;var t,e=document.createElement("script");e.type="text/javascript",e.async=!0,t="yuko29",e.src="//"+t+".disqus.com/embed.js",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(e)})()</script><noscript>Please enable JavaScript to view the <a href=http://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:yuko29.hu@email.com class="iconfont icon-email" title=email></a><a href=http://github.com/yuko29 class="iconfont icon-github" title=github></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a>
+</span><span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2020 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Yuko Hu</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script type=text/javascript>window.MathJax={tex:{}}</script><script async src=https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin=anonymous></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script></body></html>

@@ -1,0 +1,205 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>GPU Setup on Elementary OS - Yuko's Note</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Yuko Hu"><meta name=description content="紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。 而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。
+"><meta name=keywords content="Yuko,yuko29"><meta name=generator content="Hugo 0.129.0 with theme even"><link rel=canonical href=http://yuko29.github.io/post/gpu-setup/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href=/sass/main.min.65ba10c33328e29aa9919dd2d128178677d70bcc8e284e9829109ce84f8bb988.css rel=stylesheet><meta property="og:url" content="http://yuko29.github.io/post/gpu-setup/"><meta property="og:site_name" content="Yuko's Note"><meta property="og:title" content="GPU Setup on Elementary OS"><meta property="og:description" content="紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。 而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2023-05-06T20:16:59+08:00"><meta property="article:modified_time" content="2023-05-06T20:16:59+08:00"><meta property="article:tag" content="GPU"><meta property="article:tag" content="CUDA"><meta itemprop=name content="GPU Setup on Elementary OS"><meta itemprop=description content="紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。 而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。"><meta itemprop=datePublished content="2023-05-06T20:16:59+08:00"><meta itemprop=dateModified content="2023-05-06T20:16:59+08:00"><meta itemprop=wordCount content="1906"><meta itemprop=keywords content="GPU,CUDA"><meta name=twitter:card content="summary"><meta name=twitter:title content="GPU Setup on Elementary OS"><meta name=twitter:description content="紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。 而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Yuko's Note</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/about><li class=mobile-menu-item>About</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Yuko's Note</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/about>About</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>GPU Setup on Elementary OS</h1><div class=post-meta><span class=post-time>2023-05-06</span><div class=post-category><a href=/categories/os/>OS</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><ul><li><a href=#nvidia-gpu-driver>Nvidia GPU driver</a><ul><li><a href=#kernel-升級>Kernel 升級</a></li><li><a href=#清除-nvidia-driver>清除 nvidia driver</a></li><li><a href=#關閉自動更新>關閉自動更新</a></li></ul></li><li><a href=#cuda>CUDA</a></li><li><a href=#cudnn>CuDNN</a></li><li><a href=#trouble-shooting>Trouble shooting</a><ul><li><a href=#cuda-降版>CUDA 降版</a></li><li><a href=#缺少-nvcc>缺少 NVCC</a></li></ul></li></ul></li></ul></nav></div></div><div class=post-content><p>紀錄在 Elementary OS 裝 Nvidia GPU driver、CUDA、CuDNN 的過程。
+而後陸續補充一些在 ubuntu server 上遇到跟 nvidia driver 相關的疑難雜症解方。</p><p>Enviroment:</p><ul><li>Elementary OS 7.1 Horus</li><li>Nvidia RTX 3060</li><li>Kernel release: 5.15.0-58-generic</li></ul><h2 id=nvidia-gpu-driver>Nvidia GPU driver</h2><p>一開始蠻疑惑要裝哪個版本的，網上各種裝法都有，看到蠻多人說裝 recommand 的就好，於是我也照做，裝了推薦的 nvidia-driver-530-open 版。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ ubuntu-drivers devices
+</span></span><span class=line><span class=cl>vendor   : NVIDIA Corporation 
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-515 - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-530-open - distro non-free recommended
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-470-server - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-525-open - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-525 - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-515-open - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-530 - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-470 - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-510 - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-515-server - distro non-free
+</span></span><span class=line><span class=cl>driver   : nvidia-driver-525-server - distro non-free
+</span></span><span class=line><span class=cl>driver   : xserver-xorg-video-nouveau - distro free <span class=nb>builtin</span>
+</span></span></code></pre></td></tr></table></div></div><p>結果不但抓不到顯卡，連叫 nvidia-smi 還會讓 kernel 不明原因當掉&mldr;。<br>說明 recommand 就只是 recommand。</p><p>最後照在 reddit 上的這篇 post: <a href=https://www.reddit.com/r/elementaryos/comments/10q99ib/you_want_to_use_elementary_os_but_have_a_nvidia/>You want to use elementary os but have a nvidia card and problems with drivers?
+</a>裝了 nvidia-driver-525 版。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ sudo su
+</span></span><span class=line><span class=cl>$ sudo apt install linux-headers-<span class=k>$(</span>uname -r<span class=k>)</span>
+</span></span><span class=line><span class=cl>$ apt-get install nvidia-driver-525
+</span></span><span class=line><span class=cl>reboot
+</span></span></code></pre></td></tr></table></div></div><p>實測 nvidia-driver-525 有成功安裝並抓到顯卡。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>+-----------------------------------------------------------------------------+
+</span></span><span class=line><span class=cl><span class=p>|</span> NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>-------------------------------+----------------------+----------------------+
+</span></span><span class=line><span class=cl><span class=p>|</span> GPU  Name        Persistence-M<span class=p>|</span> Bus-Id        Disp.A <span class=p>|</span> Volatile Uncorr. ECC <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span> Fan  Temp  Perf  Pwr:Usage/Cap<span class=p>|</span>         Memory-Usage <span class=p>|</span> GPU-Util  Compute M. <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>                               <span class=p>|</span>                      <span class=p>|</span>               MIG M. <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span><span class=o>===============================</span>+<span class=o>======================</span>+<span class=o>======================</span><span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>   <span class=m>0</span>  NVIDIA GeForce ...  Off  <span class=p>|</span> 00000000:01:00.0 Off <span class=p>|</span>                  N/A <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>  0%   40C    P8    14W / 170W <span class=p>|</span>      6MiB / 12288MiB <span class=p>|</span>      0%      Default <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>                               <span class=p>|</span>                      <span class=p>|</span>                  N/A <span class=p>|</span>
+</span></span><span class=line><span class=cl>+-------------------------------+----------------------+----------------------+
+</span></span><span class=line><span class=cl>                                                                               
+</span></span><span class=line><span class=cl>+-----------------------------------------------------------------------------+
+</span></span><span class=line><span class=cl><span class=p>|</span> Processes:                                                                  <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>  GPU   GI   CI        PID   Type   Process name                  GPU Memory <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>        ID   ID                                                   Usage      <span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span><span class=o>=============================================================================</span><span class=p>|</span>
+</span></span><span class=line><span class=cl><span class=p>|</span>    <span class=m>0</span>   N/A  N/A      <span class=m>1239</span>      G   /usr/lib/xorg/Xorg                  4MiB <span class=p>|</span>
+</span></span><span class=line><span class=cl>+-----------------------------------------------------------------------------+
+</span></span></code></pre></td></tr></table></div></div><h3 id=kernel-升級>Kernel 升級</h3><p>(2024.3.7 Update)</p><p>前陣子 kernel 升級 6.5.0-15-generic，發現 nvidia driver 動不了了。後來又發現 driver 一直編譯不成功，查了 <code>/var/lib/dkms/nvidia/525.147.05/build/make.log</code> 看到 gcc 編譯錯誤：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>gcc: error: unrecognized command-line option ‘-ftrivial-auto-var-init<span class=o>=</span>zero’
+</span></span></code></pre></td></tr></table></div></div><p>爬了文才知道是 <a href=https://unix.stackexchange.com/questions/766795/unrecognized-command-line-option-ftrivial-auto-var-init-zero-when-building-ke>gcc 版本問題</a>，6.5 版 kernel 是用 gcc-12 編譯的關係，原本機器上是用 gcc-11 編譯。把 gcc 換成 gcc-12 後重新載 driver 就解決了。<a href=https://askubuntu.com/questions/1500017/ubuntu-22-04-default-gcc-version-does-not-match-version-that-built-latest-defaul>參考資料</a></p><h3 id=清除-nvidia-driver>清除 nvidia driver</h3><p>(2024.3.22 Update)</p><p>需要重裝 driver 時，把現有 driver 清乾淨的好用指令：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo apt-get --purge *nvidia*
+</span></span><span class=line><span class=cl>sudo apt-get autoremove
+</span></span></code></pre></td></tr></table></div></div><p>確認沒有任何殘留：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>dpkg -l <span class=p>|</span> grep nvidia
+</span></span></code></pre></td></tr></table></div></div><p>如果重裝 driver 後，<code>nvidia-smi</code> 出現以下 error:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Failed to initialize NVML: Driver/library version mismatch
+</span></span></code></pre></td></tr></table></div></div><p>可能需要將電腦 reboot 讓 kernel 載入新的 nvidia kernel module (nvidia kernel module 和 library 是分開的，剛下載完系統 kernel 裡還是舊 module)。</p><p>如果重開機後還是出現 error，我曾經碰到過的狀況是 kernel 一直載入舊 module，解法是強制重新編譯 nvidia driver 解決。（使用上述 <code>apt install &lt;nvidia-driver></code> 安裝)。</p><div class="admonition tip"><p class=admonition-title>Tip</p><p>Build from source 解決一切問題。</p></div><h3 id=關閉自動更新>關閉自動更新</h3><p>(2024.4.13 Update)</p><p>Ubuntu 會自動更新系統和套件，有時會連顯卡驅動一起更新，導致顯卡無法使用。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ nvidia-smi
+</span></span><span class=line><span class=cl>Failed to initialize NVML: Driver/library version mismatch
+</span></span></code></pre></td></tr></table></div></div><h4 id=排查方法>排查方法</h4><p>檢查 dpkg 更新紀錄：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ cat /var/log/dpkg.log <span class=p>|</span> grep nvidia <span class=p>|</span> grep upgrade
+</span></span><span class=line><span class=cl>...
+</span></span><span class=line><span class=cl>2024-04-13 06:30:46 upgrade libnvidia-decode-535-server:amd64 535.161.07-0ubuntu0.20.04.1 535.161.08-0ubuntu2.20.04.1                                                                    
+</span></span><span class=line><span class=cl>2024-04-13 06:30:47 upgrade libnvidia-compute-535-server:amd64 535.161.07-0ubuntu0.20.04.1 535.161.08-0ubuntu2.20.04.1   
+</span></span><span class=line><span class=cl>...
+</span></span></code></pre></td></tr></table></div></div><p>發現 driver 版本從 <code>535.161.07</code> 升到 <code>535.161.08</code> 了</p><p>查看系統 nvidia driver 版本：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ cat /proc/driver/nvidia/version
+</span></span><span class=line><span class=cl>NVRM version: NVIDIA UNIX x86_64 Kernel Module  535.161.07  Sat Feb <span class=m>17</span> 22:55:48 UTC <span class=m>2024</span>
+</span></span><span class=line><span class=cl>GCC version:  gcc version 9.4.0 <span class=o>(</span>Ubuntu 9.4.0-1ubuntu1~20.04.2<span class=o>)</span> 
+</span></span></code></pre></td></tr></table></div></div><p>發現系統內的 driver 還在 <code>535.161.07</code>。</p><p>查看下載的 nvidia driver 版本：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ apt list --installed <span class=p>|</span> grep nvidia 
+</span></span><span class=line><span class=cl>nvidia-dkms-535-server/focal-updates,focal-security,now 535.161.08-0ubuntu2.20.04.1 amd64 <span class=o>[</span>installed,automatic<span class=o>]</span>
+</span></span><span class=line><span class=cl>nvidia-driver-535-server/focal-updates,focal-security,now 535.161.08-0ubuntu2.20.04.1 amd64 <span class=o>[</span>installed,automatic<span class=o>]</span>
+</span></span><span class=line><span class=cl>...
+</span></span></code></pre></td></tr></table></div></div><p>下載下來安裝的 driver 已經是 <code>535.161.08</code>，並且是被自動更新的。</p><p>這個指令也可以查看下載的 nvidia driver 版本：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>dpkg -l <span class=p>|</span> grep -i nvidia
+</span></span></code></pre></td></tr></table></div></div><p>這時候只需要重新開機就可以加載新的 driver 進系統了。但是 server 的系統常常更新 driver 很令人困擾，可以關閉自動更新解決。</p><p>幫 driver 鎖定版本不讓它被自動更新：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo apt-mark hold nvidia-driver-535-server
+</span></span></code></pre></td></tr></table></div></div><p>解除鎖定：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo apt-mark unhold nvidia-driver-535-server
+</span></span></code></pre></td></tr></table></div></div><p>查看鎖定版本的套件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>apt-mark showhold
+</span></span></code></pre></td></tr></table></div></div><h2 id=cuda>CUDA</h2><p>CUDA 安裝很簡單，去<a href=https://developer.nvidia.com/cuda-toolkit-archive>官網</a>按版本抓 Runfile 下來安裝就可以了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo sh cuda_12.0.1_525.85.12_linux.run 
+</span></span></code></pre></td></tr></table></div></div><p>設定環境變數。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>export</span> <span class=nv>PATH</span><span class=o>=</span><span class=s2>&#34;/usr/local/cuda-12.0/bin:</span><span class=nv>$PATH</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl><span class=nb>export</span> <span class=nv>LD_LIBRARY_PATH</span><span class=o>=</span><span class=s2>&#34;/usr/local/cuda-12.0/lib64:</span><span class=nv>$LD_LIBRARY_PATH</span><span class=s2>&#34;</span>
+</span></span></code></pre></td></tr></table></div></div><p>看有沒有抓到 nvcc。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ nvcc -V
+</span></span><span class=line><span class=cl>nvcc: NVIDIA <span class=o>(</span>R<span class=o>)</span> Cuda compiler driver
+</span></span><span class=line><span class=cl>Copyright <span class=o>(</span>c<span class=o>)</span> 2005-2023 NVIDIA Corporation
+</span></span><span class=line><span class=cl>Built on Fri_Jan__6_16:45:21_PST_2023
+</span></span><span class=line><span class=cl>Cuda compilation tools, release 12.0, V12.0.140
+</span></span><span class=line><span class=cl>Build cuda_12.0.r12.0/compiler.32267302_0
+</span></span></code></pre></td></tr></table></div></div><h2 id=cudnn>CuDNN</h2><p>CuDNN 我是去<a href=https://developer.nvidia.com/rdp/cudnn-download>官網</a> 直接下載 tar file。
+解壓之後按照 <a href=https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#installlinux-tar>NVIDIA cuDNN Documentation</a> 指示把 source 和 lib 裝到 cuda 目錄下面。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>$ sudo cp cudnn-*-archive/include/cudnn*.h /usr/local/cuda/include 
+</span></span><span class=line><span class=cl>$ sudo cp -P cudnn-*-archive/lib/libcudnn* /usr/local/cuda/lib64 
+</span></span><span class=line><span class=cl>$ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=trouble-shooting>Trouble shooting</h2><h3 id=cuda-降版>CUDA 降版</h3><p>最近要用 tensorflow==2.11.0 訓練模型時，被 report 找不到 <code>libcublas.so.11</code> 和其他三四個 lib，沒辦法上 GPU 訓練。心想奇怪之前明明就裝好 CUDA，怎麼會說沒有，結果把 CUDA 目錄下的 library 列出來一看，發現的確是有這個 <code>libcublas.so</code>，但卻是 <code>libcublas.so.12</code>。
+好哦，所以是我裝的 CUDA 太新了，需要降版。</p><p><a href=https://www.tensorflow.org/install/source#gpu>Tensorflow 與適用 CUDA 的版本對照表</a></p><p>降版步驟：解除安裝舊 CUDA，安裝新 CUDA</p><p>CUDA 安裝的時候自帶 uninstaller 程式，先用這個解安裝，再刪掉遺留檔案。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo /usr/local/cuda-12.0/bin/cuda-uninstaller
+</span></span><span class=line><span class=cl>sudo rm -r /usr/local/cuda-12.0/
+</span></span></code></pre></td></tr></table></div></div><p>下載 CUDA 11 並安裝。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo sh cuda_11.7.1_515.65.01_linux.run 
+</span></span></code></pre></td></tr></table></div></div><p>因為本機上已經安裝了 nvidia driver，安裝 CUDA 時它會告訴你
+<code>Existing package manager installation of the driver found. It is strongly recommended that you remove this before continuing</code>，這時選擇 <code>continue</code>，在下一步把安裝 driver 的選項取消，不要安裝 driver。</p><p><img src=image.png alt></p><p>安裝完訊息如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>= Summary =
+</span></span><span class=line><span class=cl>===========
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Driver:   Not Selected
+</span></span><span class=line><span class=cl>Toolkit:  Installed in /usr/local/cuda-11.7/
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>Please make sure that
+</span></span><span class=line><span class=cl> -   PATH includes /usr/local/cuda-11.7/bin
+</span></span><span class=line><span class=cl> -   LD_LIBRARY_PATH includes /usr/local/cuda-11.7/lib64, or, add /usr/local/cuda-11.7/lib64 to /etc/ld.so.conf and run ldconfig as root
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>To uninstall the CUDA Toolkit, run cuda-uninstaller in /usr/local/cuda-11.7/bin
+</span></span><span class=line><span class=cl>***WARNING: Incomplete installation! This installation did not install the CUDA Driver. A driver of version at least 515.00 is required for CUDA 11.7 functionality to work.
+</span></span><span class=line><span class=cl>To install the driver using this installer, run the following command, replacing &lt;CudaInstaller&gt; with the name of this run file:
+</span></span><span class=line><span class=cl>    sudo &lt;CudaInstaller&gt;.run --silent --driver
+</span></span></code></pre></td></tr></table></div></div><p>注意到下面的 WARNING，因為在安裝的時候沒裝 driver，它告訴你 driver 版本至少要 515.00 以上才能跑，我之前裝的 driver 版本是 <code>525.105.17</code>，有超過，測試過是可以跑成功的。如果 driver 版本不對，就需要重裝 driver 了。</p><p>安裝 CuDNN 就和之前一樣去官網找對應版本下載即可。</p><h3 id=缺少-nvcc>缺少 NVCC</h3><p>有些機器上可能預裝有 CUDA 但是 toolkit 不齊全，例如少了 NVCC 導致沒辦法編譯某些套件。在沒有權限能重裝 cuda toolkit 的情況下，可以用 <a href=https://anaconda.org/nvidia/cuda-toolkit>conda</a> 在把 toolkit 下載在虛擬環境內。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>conda install nvidia/label/cuda-12.1.0::cuda-toolkit
+</span></span></code></pre></td></tr></table></div></div><iframe class=LikeCoin height=235 src="https://button.like.co/in/embed/yuko2926846/button?referrer=http%3a%2f%2fyuko29.github.io%2fpost%2fgpu-setup%2f" width=100% frameborder=0></iframe></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Yuko Hu</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2023-05-06</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hant target=_blank>CC BY-SA 4.0</a></span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/gpu/>GPU</a>
+<a href=/tags/cuda/>CUDA</a></div><nav class=post-nav><a class=prev href=/post/llm_evaluation/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">LLM Evaluation</span>
+<span class="prev-text nav-mobile">Prev</span>
+</a><a class=next href=/post/build-llvm-from-source/><span class="next-text nav-default">Build LLVM and clang From Source</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div><div id=disqus_thread></div><script type=text/javascript>(function(){if(window.location.hostname==="localhost")return;var t,e=document.createElement("script");e.type="text/javascript",e.async=!0,t="yuko29",e.src="//"+t+".disqus.com/embed.js",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(e)})()</script><noscript>Please enable JavaScript to view the <a href=http://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:yuko29.hu@email.com class="iconfont icon-email" title=email></a><a href=http://github.com/yuko29 class="iconfont icon-github" title=github></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a>
+</span><span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2020 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Yuko Hu</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script type=text/javascript>window.MathJax={tex:{}}</script><script async src=https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin=anonymous></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script></body></html>

@@ -1,0 +1,312 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>Build TVM From Source and Codegen - Yuko's Note</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Yuko Hu"><meta name=description content="最近做研究需要要看 TVM 的 CMSIS-NN backend 產生的 code，發現網路上這部份的討論不是很多。
+紀錄一下 build TVM 以及 codegen 的過程。
+"><meta name=keywords content="Yuko,yuko29"><meta name=generator content="Hugo 0.129.0 with theme even"><link rel=canonical href=http://yuko29.github.io/post/build-tvm-from-source-and-codegen/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel=stylesheet><link href=/sass/main.min.65ba10c33328e29aa9919dd2d128178677d70bcc8e284e9829109ce84f8bb988.css rel=stylesheet><meta property="og:url" content="http://yuko29.github.io/post/build-tvm-from-source-and-codegen/"><meta property="og:site_name" content="Yuko's Note"><meta property="og:title" content="Build TVM From Source and Codegen"><meta property="og:description" content="最近做研究需要要看 TVM 的 CMSIS-NN backend 產生的 code，發現網路上這部份的討論不是很多。
+紀錄一下 build TVM 以及 codegen 的過程。"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2022-11-08T22:05:58+08:00"><meta property="article:modified_time" content="2022-11-08T22:05:58+08:00"><meta property="article:tag" content="Build"><meta property="article:tag" content="Tvm"><meta itemprop=name content="Build TVM From Source and Codegen"><meta itemprop=description content="最近做研究需要要看 TVM 的 CMSIS-NN backend 產生的 code，發現網路上這部份的討論不是很多。
+紀錄一下 build TVM 以及 codegen 的過程。"><meta itemprop=datePublished content="2022-11-08T22:05:58+08:00"><meta itemprop=dateModified content="2022-11-08T22:05:58+08:00"><meta itemprop=wordCount content="1482"><meta itemprop=keywords content="Build,Tvm"><meta name=twitter:card content="summary"><meta name=twitter:title content="Build TVM From Source and Codegen"><meta name=twitter:description content="最近做研究需要要看 TVM 的 CMSIS-NN backend 產生的 code，發現網路上這部份的討論不是很多。
+紀錄一下 build TVM 以及 codegen 的過程。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Yuko's Note</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/about><li class=mobile-menu-item>About</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Yuko's Note</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/about>About</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Build TVM From Source and Codegen</h1><div class=post-meta><span class=post-time>2022-11-08</span><div class=post-category><a href=/categories/deep-learning/>Deep Learning</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>Contents</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><ul><li><a href=#build-tvm>Build TVM</a></li><li><a href=#compile>Compile</a><ul><li><a href=#codegen-content>Codegen content</a></li></ul></li><li><a href=#reference>Reference</a></li></ul></li></ul></nav></div></div><div class=post-content><p>最近做研究需要要看 TVM 的 CMSIS-NN backend 產生的 code，發現網路上這部份的討論不是很多。<br>紀錄一下 build TVM 以及 codegen 的過程。</p><h2 id=build-tvm>Build TVM</h2><p>考慮到可能之後會改 TVM，所以選擇 build from source，主要按照<a href=https://tvm.apache.org/docs/install/from_source.html>官方文件</a>的流程走。<br>由於我習慣把各個不同的軟體建置環境隔開，避免產生依賴套件的版本衝突，所以我選擇在 conda environment 裡 build。</p><p>1, 下載 TVM repo</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>git clone --recursive https://github.com/apache/tvm tvm
+</span></span></code></pre></td></tr></table></div></div><ol start=2><li>建立 conda environment</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Create a conda environment with the dependencies specified by the yaml</span>
+</span></span><span class=line><span class=cl>conda env create --file conda/build-environment.yaml
+</span></span><span class=line><span class=cl><span class=c1># Activate the created environment</span>
+</span></span><span class=line><span class=cl>conda activate tvm-build
+</span></span></code></pre></td></tr></table></div></div><ol start=3><li>編輯 cmake configuration</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir build
+</span></span><span class=line><span class=cl>cp cmake/config.cmake build
+</span></span></code></pre></td></tr></table></div></div><p>這部份需要特別留意，為了讓編譯出來的 TVM 能夠支援 CMSIS-NN，需要在 <code>config.cmake</code> 修改以下相關設定。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>set(USE_CMSISNN ON)
+</span></span><span class=line><span class=cl>set(USE_MICRO ON)
+</span></span><span class=line><span class=cl>set(USE_LLVM ON)
+</span></span></code></pre></td></tr></table></div></div><p>其他設定可以依據需求更動。</p><ol start=4><li>Build</li></ol><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>cd</span> build
+</span></span><span class=line><span class=cl>cmake .. -G Ninja
+</span></span><span class=line><span class=cl>ninja
+</span></span></code></pre></td></tr></table></div></div><p>完成後會在 <code>build</code> 目錄下看到 <code>libtvm_runtime.so</code> 和 <code>libtvm.so</code> 這兩個檔案。</p><ol start=5><li>Install TVM package</li></ol><p>官方有提供兩種作法：</p><ul><li>Method 1</li></ul><p>如果會常常改動 TVM code 或設定需要重新 build 的話，可以設定 <code>PYTHONPATH</code> 直接告訴 python library 的位置。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>export</span> <span class=nv>TVM_HOME</span><span class=o>=</span>/path/to/tvm
+</span></span><span class=line><span class=cl><span class=nb>export</span> <span class=nv>PYTHONPATH</span><span class=o>=</span><span class=nv>$TVM_HOME</span>/python:<span class=si>${</span><span class=nv>PYTHONPATH</span><span class=si>}</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>Method 2</li></ul><p>建立 python binding，這個作法 TVM 會被裝在當前的環境下，所以如果是在虛擬環境下裝，離開虛擬環境後就不能使用了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>cd</span> python
+</span></span><span class=line><span class=cl>python setup.py install
+</span></span></code></pre></td></tr></table></div></div><p>到此 TVM 就安裝完成了。</p><h2 id=compile>Compile</h2><p>裝好 TVM 後就能使用 <code>tvmc</code> 來 compile model 了。<br>設定 target 是 <code>cmsis-nn,c</code>，TVM 會盡可能去把 op map 到 <code>CMSIS-NN</code> library 實作 ，不能的才會用 c code。<br>這裡指定 target cpu 是 <code>cortex-m7</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>tvmc compile --target<span class=o>=</span>cmsis-nn,c <span class=se>\ </span>
+</span></span><span class=line><span class=cl>    --target-cmsis-nn-mcpu<span class=o>=</span>cortex-m7 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --target-c-mcpu<span class=o>=</span>cortex-m7 <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --runtime<span class=o>=</span>crt <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --executor<span class=o>=</span>aot <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --executor-aot-interface-api<span class=o>=</span>c <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --executor-aot-unpacked-api<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --pass-config tir.usmp.enable<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --pass-config tir.usmp.algorithm<span class=o>=</span>hill_climb <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --pass-config tir.disable_storage_rewrite<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    --pass-config tir.disable_vectorize<span class=o>=</span><span class=m>1</span> <span class=se>\
+</span></span></span><span class=line><span class=cl><span class=se></span>    ./pretrainedResnet_quant.tflite <span class=se>\ </span>              <span class=c1># model</span>
+</span></span><span class=line><span class=cl>    --output-format<span class=o>=</span>mlf
+</span></span></code></pre></td></tr></table></div></div><p>Compile 完會產生一個 TAR package <code>module.tar</code>，把它解開後會得到該 model 透過 TVM 產生出來的 library，其格式為 <a href=https://tvm.apache.org/docs/arch/model_library_format.html>Model Library Format</a>，詳細的 layout 介紹可以參考文件。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>mlperf-ic
+</span></span><span class=line><span class=cl>├── codegen
+</span></span><span class=line><span class=cl>│   └── host
+</span></span><span class=line><span class=cl>│       ├── include
+</span></span><span class=line><span class=cl>│       │   └── tvmgen_default.h
+</span></span><span class=line><span class=cl>│       └── src
+</span></span><span class=line><span class=cl>│           ├── default_lib0.c
+</span></span><span class=line><span class=cl>│           ├── default_lib1.c
+</span></span><span class=line><span class=cl>│           └── default_lib2.c
+</span></span><span class=line><span class=cl>├── metadata.json
+</span></span><span class=line><span class=cl>├── module.tar
+</span></span><span class=line><span class=cl>├── parameters
+</span></span><span class=line><span class=cl>│   └── default.params
+</span></span><span class=line><span class=cl>├── runtime
+</span></span><span class=line><span class=cl>└── src
+</span></span><span class=line><span class=cl>    └── default.relay
+</span></span></code></pre></td></tr></table></div></div><h3 id=codegen-content>Codegen content</h3><p>要看 model codegen 的內容，主要看 <code>codegen</code> 目錄。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>codegen
+</span></span><span class=line><span class=cl>└── host
+</span></span><span class=line><span class=cl>    ├── include
+</span></span><span class=line><span class=cl>    │   └── tvmgen_default.h
+</span></span><span class=line><span class=cl>    └── src
+</span></span><span class=line><span class=cl>        ├── default_lib0.c
+</span></span><span class=line><span class=cl>        ├── default_lib1.c
+</span></span><span class=line><span class=cl>        └── default_lib2.c
+</span></span></code></pre></td></tr></table></div></div><p><code>tvmgen_default.h</code> 裡定義了 model 的 input/output tensor pointer 和宣告 model 的 entry point。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cm>/*!
+</span></span></span><span class=line><span class=cl><span class=cm> * \brief Input tensor pointers for TVM module &#34;default&#34; 
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>tvmgen_default_inputs</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>void</span><span class=o>*</span> <span class=n>input_1_int8</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/*!
+</span></span></span><span class=line><span class=cl><span class=cm> * \brief Output tensor pointers for TVM module &#34;default&#34; 
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=n>tvmgen_default_outputs</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>void</span><span class=o>*</span> <span class=n>Identity_int8</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/*!
+</span></span></span><span class=line><span class=cl><span class=cm> * \brief entrypoint function for TVM module &#34;default&#34;
+</span></span></span><span class=line><span class=cl><span class=cm> * \param inputs Input tensors for the module 
+</span></span></span><span class=line><span class=cl><span class=cm> * \param outputs Output tensors for the module 
+</span></span></span><span class=line><span class=cl><span class=cm> */</span>
+</span></span><span class=line><span class=cl><span class=kt>int32_t</span> <span class=nf>tvmgen_default_run</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>tvmgen_default_inputs</span><span class=o>*</span> <span class=n>inputs</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=k>struct</span> <span class=n>tvmgen_default_outputs</span><span class=o>*</span> <span class=n>outputs</span>
+</span></span><span class=line><span class=cl><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=cm>/*!
+</span></span></span></code></pre></td></tr></table></div></div><p><code>default_lib0.c</code> 裡放的是 model 的權重等 constant，以及定義 entry point function。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&#34;tvm/runtime/c_runtime_api.h&#34;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#ifdef __cplusplus
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=k>extern</span> <span class=s>&#34;C&#34;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl><span class=cp>#endif
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=nf>__attribute__</span><span class=p>((</span><span class=nf>section</span><span class=p>(</span><span class=s>&#34;.rodata.tvm&#34;</span><span class=p>),</span> <span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=k>struct</span> <span class=n>global_const_workspace</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>int8_t</span> <span class=n>constant_48_let</span><span class=p>[</span><span class=mi>36864</span><span class=p>]</span> <span class=nf>__attribute__</span><span class=p>((</span><span class=nf>aligned</span><span class=p>(</span><span class=mi>16</span><span class=p>)));</span> <span class=c1>// 36864 bytes, aligned offset: 0
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int8_t</span> <span class=n>constant_42_let</span><span class=p>[</span><span class=mi>18432</span><span class=p>]</span> <span class=nf>__attribute__</span><span class=p>((</span><span class=n>packed</span><span class=p>,</span> <span class=nf>aligned</span><span class=p>(</span><span class=mi>16</span><span class=p>)));</span> <span class=c1>// 18432 bytes, aligned offset: 36864
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=kt>int8_t</span> <span class=n>constant_30_let</span><span class=p>[</span><span class=mi>9216</span><span class=p>]</span> <span class=nf>__attribute__</span><span class=p>((</span><span class=n>packed</span><span class=p>,</span> <span class=nf>aligned</span><span class=p>(</span><span class=mi>16</span><span class=p>)));</span> <span class=c1>// 9216 bytes, aligned offset: 55296
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=p>...</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=n>global_const_workspace</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=p>.</span><span class=n>constant_48_let</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=o>-</span><span class=mh>0x3d</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x0f</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x12</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x0a</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x3e</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x4b</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x2b</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x17</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>    <span class=o>-</span><span class=mh>0x01</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x27</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x47</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x1c</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x0f</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x17</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x2f</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x28</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>    <span class=o>-</span><span class=mh>0x06</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x17</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x10</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x1f</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x00</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x2d</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x4c</span><span class=p>,</span> <span class=o>+</span><span class=mh>0x10</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>    <span class=o>-</span><span class=mh>0x29</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x22</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x13</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x01</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x3e</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x3e</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x38</span><span class=p>,</span> <span class=o>-</span><span class=mh>0x46</span><span class=p>,</span> 
+</span></span><span class=line><span class=cl>    <span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=p>};</span><span class=c1>// of total size 84120 bytes
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nf>__attribute__</span><span class=p>((</span><span class=nf>section</span><span class=p>(</span><span class=s>&#34;.bss.noinit.tvm&#34;</span><span class=p>),</span> <span class=nf>aligned</span><span class=p>(</span><span class=mi>16</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl><span class=k>static</span> <span class=kt>uint8_t</span> <span class=n>global_workspace</span><span class=p>[</span><span class=mi>49728</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;tvmgen_default.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp></span><span class=n>TVM_DLL</span> <span class=kt>int32_t</span> <span class=nf>tvmgen_default___tvm_main__</span><span class=p>(</span><span class=kt>void</span><span class=o>*</span> <span class=n>input_1_int8</span><span class=p>,</span><span class=kt>void</span><span class=o>*</span> <span class=n>output0</span><span class=p>,</span><span class=kt>uint8_t</span><span class=o>*</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span><span class=kt>uint8_t</span><span class=o>*</span> <span class=n>global_workspace_1_var</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kt>int32_t</span> <span class=nf>tvmgen_default_run</span><span class=p>(</span><span class=k>struct</span> <span class=n>tvmgen_default_inputs</span><span class=o>*</span> <span class=n>inputs</span><span class=p>,</span><span class=k>struct</span> <span class=n>tvmgen_default_outputs</span><span class=o>*</span> <span class=n>outputs</span><span class=p>)</span> <span class=p>{</span><span class=k>return</span> <span class=nf>tvmgen_default___tvm_main__</span><span class=p>(</span><span class=n>inputs</span><span class=o>-&gt;</span><span class=n>input_1_int8</span><span class=p>,</span><span class=n>outputs</span><span class=o>-&gt;</span><span class=n>Identity_int8</span><span class=p>,</span><span class=o>&amp;</span><span class=n>global_const_workspace</span><span class=p>,</span><span class=o>&amp;</span><span class=n>global_workspace</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>default_lib1.c</code> 裡定義了 <code>tvmgen_default___tvm_main__</code> function，是 model inference 的主要流程。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>TVM_DLL</span> <span class=n>int32_t</span> <span class=n>tvmgen_default___tvm_main__</span><span class=p>(</span><span class=n>int8_t</span><span class=o>*</span> <span class=n>input_1_int8_buffer_var</span><span class=p>,</span> <span class=n>int8_t</span><span class=o>*</span> <span class=n>Identity_int8_buffer_var</span><span class=p>,</span> <span class=n>uint8_t</span><span class=o>*</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>uint8_t</span><span class=o>*</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=n>void</span><span class=o>*</span> <span class=n>constant_28_let</span> <span class=o>=</span> <span class=p>(</span><span class=o>&amp;</span><span class=p>(</span><span class=n>global_const_workspace_0_var</span><span class=p>[</span><span class=mi>81968</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>  <span class=n>void</span><span class=o>*</span> <span class=n>constant_30_let</span> <span class=o>=</span> <span class=p>(</span><span class=o>&amp;</span><span class=p>(</span><span class=n>global_const_workspace_0_var</span><span class=p>[</span><span class=mi>55296</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>  <span class=o>...</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_0</span><span class=p>(</span><span class=n>input_1_int8_buffer_var</span><span class=p>,</span> <span class=n>constant_0_let</span><span class=p>,</span> <span class=n>constant_1_let</span><span class=p>,</span> <span class=n>constant_3_let</span><span class=p>,</span> <span class=n>constant_5_let</span><span class=p>,</span> <span class=n>sid_7_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_2</span><span class=p>(</span><span class=n>sid_7_let</span><span class=p>,</span> <span class=n>constant_6_let</span><span class=p>,</span> <span class=n>constant_7_let</span><span class=p>,</span> <span class=n>constant_9_let</span><span class=p>,</span> <span class=n>constant_11_let</span><span class=p>,</span> <span class=n>sid_14_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_3</span><span class=p>(</span><span class=n>sid_14_let</span><span class=p>,</span> <span class=n>constant_12_let</span><span class=p>,</span> <span class=n>constant_13_let</span><span class=p>,</span> <span class=n>constant_15_let</span><span class=p>,</span> <span class=n>constant_17_let</span><span class=p>,</span> <span class=n>sid_21_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_1</span><span class=p>(</span><span class=n>sid_7_let</span><span class=p>,</span> <span class=n>sid_21_let</span><span class=p>,</span> <span class=n>sid_22_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_5</span><span class=p>(</span><span class=n>sid_22_let</span><span class=p>,</span> <span class=n>constant_18_let</span><span class=p>,</span> <span class=n>constant_19_let</span><span class=p>,</span> <span class=n>constant_21_let</span><span class=p>,</span> <span class=n>constant_23_let</span><span class=p>,</span> <span class=n>sid_29_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_7</span><span class=p>(</span><span class=n>sid_22_let</span><span class=p>,</span> <span class=n>constant_24_let</span><span class=p>,</span> <span class=n>constant_25_let</span><span class=p>,</span> <span class=n>constant_27_let</span><span class=p>,</span> <span class=n>constant_29_let</span><span class=p>,</span> <span class=n>sid_36_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_8</span><span class=p>(</span><span class=n>sid_36_let</span><span class=p>,</span> <span class=n>constant_30_let</span><span class=p>,</span> <span class=n>constant_31_let</span><span class=p>,</span> <span class=n>constant_33_let</span><span class=p>,</span> <span class=n>constant_35_let</span><span class=p>,</span> <span class=n>sid_43_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_6</span><span class=p>(</span><span class=n>sid_29_let</span><span class=p>,</span> <span class=n>sid_43_let</span><span class=p>,</span> <span class=n>sid_44_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_10</span><span class=p>(</span><span class=n>sid_44_let</span><span class=p>,</span> <span class=n>constant_36_let</span><span class=p>,</span> <span class=n>constant_37_let</span><span class=p>,</span> <span class=n>constant_39_let</span><span class=p>,</span> <span class=n>constant_41_let</span><span class=p>,</span> <span class=n>sid_51_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_12</span><span class=p>(</span><span class=n>sid_44_let</span><span class=p>,</span> <span class=n>constant_42_let</span><span class=p>,</span> <span class=n>constant_43_let</span><span class=p>,</span> <span class=n>constant_45_let</span><span class=p>,</span> <span class=n>constant_47_let</span><span class=p>,</span> <span class=n>sid_58_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_13</span><span class=p>(</span><span class=n>sid_58_let</span><span class=p>,</span> <span class=n>constant_48_let</span><span class=p>,</span> <span class=n>constant_49_let</span><span class=p>,</span> <span class=n>constant_51_let</span><span class=p>,</span> <span class=n>constant_53_let</span><span class=p>,</span> <span class=n>sid_65_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_11</span><span class=p>(</span><span class=n>sid_51_let</span><span class=p>,</span> <span class=n>sid_65_let</span><span class=p>,</span> <span class=n>sid_66_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_15</span><span class=p>(</span><span class=n>sid_66_let</span><span class=p>,</span> <span class=n>sid_67_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_16</span><span class=p>(</span><span class=n>sid_67_let</span><span class=p>,</span> <span class=n>constant_54_let</span><span class=p>,</span> <span class=n>constant_55_let</span><span class=p>,</span> <span class=n>sid_70_let</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>tvmgen_default_cmsis_nn_main_17</span><span class=p>(</span><span class=n>sid_70_let</span><span class=p>,</span> <span class=n>Identity_int8_buffer_var</span><span class=p>,</span> <span class=n>global_const_workspace_0_var</span><span class=p>,</span> <span class=n>global_workspace_1_var</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span> <span class=p>)</span> <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>default_lib2.c</code>　裡定義了每個 operator 的實作會 bind 到哪個 CNSIS-NN 的 operator 實作上。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=p>...</span>
+</span></span><span class=line><span class=cl><span class=n>TVM_DLL</span> <span class=kt>int32_t</span> <span class=nf>tvmgen_default_cmsis_nn_main_0</span><span class=p>(</span><span class=kt>int8_t</span><span class=o>*</span> <span class=n>input_</span><span class=p>,</span> <span class=kt>int8_t</span><span class=o>*</span> <span class=n>filter_</span><span class=p>,</span> <span class=kt>int32_t</span><span class=o>*</span> <span class=n>multiplier_</span><span class=p>,</span> <span class=kt>int32_t</span><span class=o>*</span> <span class=n>bias_</span><span class=p>,</span> <span class=kt>int32_t</span><span class=o>*</span> <span class=n>shift_</span><span class=p>,</span> <span class=kt>int8_t</span><span class=o>*</span> <span class=n>output_</span><span class=p>,</span> <span class=kt>uint8_t</span><span class=o>*</span> <span class=n>global_const_workspace_2_var</span><span class=p>,</span> <span class=kt>uint8_t</span><span class=o>*</span> <span class=n>global_workspace_3_var</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kt>void</span><span class=o>*</span> <span class=n>context_buffer_0_let</span> <span class=o>=</span> <span class=p>(</span><span class=o>&amp;</span><span class=p>(</span><span class=n>global_workspace_3_var</span><span class=p>[</span><span class=mi>16384</span><span class=p>]));</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_context</span> <span class=n>context</span><span class=o>=</span> <span class=p>{</span><span class=n>context_buffer_0_let</span><span class=p>,</span><span class=mi>108</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_tile</span> <span class=n>stride</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_tile</span> <span class=n>padding</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_tile</span> <span class=n>dilation</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_activation</span> <span class=n>activation</span> <span class=o>=</span> <span class=p>{</span><span class=o>-</span><span class=mi>128</span><span class=p>,</span><span class=mi>127</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_conv_params</span> <span class=n>conv_params</span> <span class=o>=</span> <span class=p>{</span><span class=mi>128</span><span class=p>,</span> <span class=o>-</span><span class=mi>128</span><span class=p>,</span> <span class=n>stride</span><span class=p>,</span> <span class=n>padding</span><span class=p>,</span> <span class=n>dilation</span><span class=p>,</span> <span class=n>activation</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_per_channel_quant_params</span> <span class=n>quant_params</span> <span class=o>=</span> <span class=p>{</span><span class=n>multiplier_</span><span class=p>,</span> <span class=n>shift_</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_dims</span> <span class=n>input_dims</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>32</span><span class=p>,</span><span class=mi>32</span><span class=p>,</span><span class=mi>3</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_dims</span> <span class=n>filter_dims</span> <span class=o>=</span> <span class=p>{</span><span class=mi>16</span><span class=p>,</span><span class=mi>3</span><span class=p>,</span><span class=mi>3</span><span class=p>,</span><span class=mi>3</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_dims</span> <span class=n>bias_dims</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>,</span><span class=mi>1</span><span class=p>,</span><span class=mi>16</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>cmsis_nn_dims</span> <span class=n>output_dims</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span><span class=mi>32</span><span class=p>,</span><span class=mi>32</span><span class=p>,</span><span class=mi>16</span><span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=n>arm_cmsis_nn_status</span> <span class=n>status</span> <span class=o>=</span> <span class=nf>arm_convolve_wrapper_s8</span><span class=p>(</span><span class=o>&amp;</span><span class=n>context</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>conv_params</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>quant_params</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>input_dims</span><span class=p>,</span> <span class=n>input_</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>filter_dims</span><span class=p>,</span> <span class=n>filter_</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>bias_dims</span><span class=p>,</span> <span class=n>bias_</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>output_dims</span><span class=p>,</span> <span class=n>output_</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>status</span> <span class=o>!=</span> <span class=n>ARM_CMSIS_NN_SUCCESS</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=o>-</span><span class=mi>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>...</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=reference>Reference</h2><p><a href=https://tvm.apache.org/docs/install/from_source.html>TVM - Install from Source</a><br><a href=https://tvm.apache.org/docs/how_to/work_with_microtvm/micro_ethosu.html>TVM - Running TVM on bare metal Arm(R) Cortex(R)-M55 CPU and Ethos(TM)-U55 NPU with CMSIS-NN</a><br><a href=https://tvm.apache.org/docs/arch/model_library_format.html>TVM - Model Library Format</a><br><a href=https://github.com/apache/tvm/tree/main/apps/microtvm/cmsisnn>Running TVM on bare metal Arm(R) Cortex(R)-M55 CPU and CMSIS-NN</a></p><iframe class=LikeCoin height=235 src="https://button.like.co/in/embed/yuko2926846/button?referrer=http%3a%2f%2fyuko29.github.io%2fpost%2fbuild-tvm-from-source-and-codegen%2f" width=100% frameborder=0></iframe></div><div class=post-copyright><p class=copyright-item><span class=item-title>Author</span>
+<span class=item-content>Yuko Hu</span></p><p class=copyright-item><span class=item-title>LastMod</span>
+<span class=item-content>2022-11-08</span></p><p class=copyright-item><span class=item-title>License</span>
+<span class=item-content><a rel="license noopener" href=https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hant target=_blank>CC BY-SA 4.0</a></span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/build/>build</a>
+<a href=/tags/tvm/>tvm</a></div><nav class=post-nav><a class=prev href=/post/build-llvm-from-source/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">Build LLVM and clang From Source</span>
+<span class="prev-text nav-mobile">Prev</span>
+</a><a class=next href=/post/xv6-environment-setup/><span class="next-text nav-default">Xv6 Environment Setup</span>
+<span class="next-text nav-mobile">Next</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div><div id=disqus_thread></div><script type=text/javascript>(function(){if(window.location.hostname==="localhost")return;var t,e=document.createElement("script");e.type="text/javascript",e.async=!0,t="yuko29",e.src="//"+t+".disqus.com/embed.js",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(e)})()</script><noscript>Please enable JavaScript to view the <a href=http://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:yuko29.hu@email.com class="iconfont icon-email" title=email></a><a href=http://github.com/yuko29 class="iconfont icon-github" title=github></a></div><div class=copyright><span class=power-by>Powered by <a class=hexo-link href=https://gohugo.io>Hugo</a>
+</span><span class=division>|</span>
+<span class=theme-info>Theme -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2020 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Yuko Hu</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script type=text/javascript>window.MathJax={tex:{}}</script><script async src=https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin=anonymous></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-NC0VXE56DE"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-NC0VXE56DE")}</script></body></html>
