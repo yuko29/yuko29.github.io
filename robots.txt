@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: http://yuko29.github.io/sitemap.xml
